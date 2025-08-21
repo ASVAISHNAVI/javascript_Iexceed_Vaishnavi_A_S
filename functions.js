@@ -1,7 +1,7 @@
 
 function functionname(parameters)
  {
-    //body of the function
+    
  }
  
  let username="Rakesh";

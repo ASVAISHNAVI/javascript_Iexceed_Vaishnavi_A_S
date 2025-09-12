@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>World Clock – Select Time Zone</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      padding: 30px;
+      color: #333;
+    }
+
+    h2 {
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    select {
+      display: block;
+      margin: 0 auto 30px auto;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 300px;
+    }
+
+    .clock {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .clock.day {
+      background: #ffffff;
+      color: #2c3e50;
+    }
+
+    .clock.night {
+      background: #2c3e50;
+      color: #ecf0f1;
+    }
+
+    .city {
+      font-weight: 600;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .time {
+      font-size: 40px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .greeting {
+      margin-top: 10px;
+      font-size: 16px;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+
+<h2>World Clock – Select Time Zone</h2>
+<select id="timezone"></select>
+<div id="clock"></div>
+
+<script>
+const timeZones = Intl.supportedValuesOf('timeZone');
+
+function getClockEmoji(hour) {
+  const clockEmojis = [
+    "🕐", "🕑", "🕒", "🕓", "🕔", "🕕",
+    "🕖", "🕗", "🕘", "🕙", "🕚", "🕛"
+  ];
+  return clockEmojis[(hour % 12) || 11];
+}
+
+function getGreeting(hour) {
+  if (hour >= 5 && hour < 12) return { text: "Good Morning", icon: "🌅", theme: "day" };
+  if (hour >= 12 && hour < 17) return { text: "Good Afternoon", icon: "☀️", theme: "day" };
+  if (hour >= 17 && hour < 21) return { text: "Good Evening", icon: "🌇", theme: "night" };
+  return { text: "Good Night", icon: "🌙", theme: "night" };
+}
+
+function populateDropdown() {
+  const select = document.getElementById("timezone");
+  timeZones.forEach(zone => {
+    const option = document.createElement("option");
+    option.value = zone;
+    option.textContent = zone;
+    select.appendChild(option);
+  });
+
+  // Default to user's local time zone
+  select.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+function updateClock() {
+  const zone = document.getElementById("timezone").value;
+  const now = new Date();
+
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: zone,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  const hourFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: zone,
+    hour: 'numeric',
+    hour12: false
+  });
+
+  const time = timeFormatter.format(now);
+  const hour = parseInt(hourFormatter.format(now));
+  const emoji = getClockEmoji(hour);
+  const greetingData = getGreeting(hour);
+
+  const clockDiv = document.getElementById("clock");
+  clockDiv.className = `clock ${greetingData.theme}`;
+  clockDiv.innerHTML = `
+    <div class="city">${emoji} ${zone}</div>
+    <div class="time">${time}</div>
+    <div class="greeting">${greetingData.icon} ${greetingData.text}</div>
+  `;
+}
+
+populateDropdown();
+updateClock();
+setInterval(updateClock, 1000);
+document.getElementById("timezone").addEventListener("change", updateClock);
+</script>
+
+</body>
+</html>
